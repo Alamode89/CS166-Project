@@ -257,8 +257,14 @@ public class Retail {
          boolean keepon = true;
          while(keepon) {
             // These are sample SQL statements
-            System.out.println("MAIN MENU");
-            System.out.println("---------");
+            System.out.println(" OOO  N   N L    III N   N EEEE     RRRR  EEEE TTTTTT  AA  III L         SSS  TTTTTT  OOO  RRRR  EEEE ");
+            System.out.println("O   O NN  N L     I  NN  N E        R   R E      TT   A  A  I  L        S       TT   O   O R   R E    ");
+            System.out.println("O   O N N N L     I  N N N EEE      RRRR  EEE    TT   AAAA  I  L         SSS    TT   O   O RRRR  EEE  ");
+            System.out.println("O   O N  NN L     I  N  NN E        R R   E      TT   A  A  I  L            S   TT   O   O R R   E    ");
+            System.out.println(" OOO  N   N LLLL III N   N EEEE     R  RR EEEE   TT   A  A III LLLL     SSSS    TT    OOO  R  RR EEEE  ");
+            System.out.println("------------");                                                                                         
+            System.out.println("--Welcome!--");                                                                                                                                                                                               
+            System.out.println("------------");
             System.out.println("1. Create user");
             System.out.println("2. Log in");
             System.out.println("9. < EXIT");
