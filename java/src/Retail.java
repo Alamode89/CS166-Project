@@ -24,6 +24,8 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.ArrayList;
 import java.lang.Math;
+import java.time.LocalDateTime; 
+import java.time.format.DateTimeFormatter;
 
 /**
  * This class defines a simple embedded SQL utility class that is designed to
@@ -451,7 +453,82 @@ public class Retail {
 		}
    }
 
-   public static void placeOrder(Retail esql) {}
+   public static void placeOrder(Retail esql) {
+      int storeID;
+      String productName;
+      int numberOfUnits;
+
+      //get the store id
+      while(true) {
+         System.out.print("Enter Store ID: ");
+         try {
+            //gets the id
+				storeID = Integer.parseInt(in.readLine());
+            //checks if id is within user radius
+            String Query = String.format("SELECT S.storeID FROM Store S, Users U WHERE U.userID = " + loggeduserID + " AND calculate_distance(U.latitude, u.longitude, s.latitude, s.longitude) < 30 AND S.storeID = " + storeID + ";");
+            //throws error if out of range because the list is empty
+            List<List<String>> storeList = esql.executeQueryAndReturnResult(Query); 
+            if (storeList.size() <= 0) {
+               System.out.println("That store is too far. Please select a store within 30 miles.");
+               continue;
+            }
+            break;
+			}
+			catch(Exception e) {
+				System.out.println("Not a valid Store ID");
+				System.out.println(e);
+				continue;
+			}
+      }
+      //get name of product
+      while(true) {
+         System.out.print("Enter the name of the product: ");
+         try {
+				productName = in.readLine();
+				break;
+			}
+			catch(Exception e) {
+				System.out.println("Not a valid product");
+				System.out.println(e);
+				continue;
+			}
+      }  
+
+      //get number of units
+      while(true) {
+         System.out.print("Enter the amount of product you wish to order: ");
+         try {
+				numberOfUnits = Integer.parseInt(in.readLine());
+				break;
+			}
+			catch(Exception e) {
+				System.out.println("Not a valid amount");
+				System.out.println(e);
+				continue;
+			}
+      }
+
+      try {
+         //inserting the new order
+         String query = String.format("INSERT INTO ORDERS (customerID, storeID, productName, unitsOrdered, orderTime) VALUES (%s, %s, '%s', %s, DATE_TRUNC('second', CURRENT_TIMESTAMP::timestamp))", loggeduserID, storeID, productName, numberOfUnits);
+         esql.executeUpdate(query);
+         //subtracting the number of units from specific store
+         query = String.format("SELECT P.numberOfUnits FROM Product P WHERE P.storeID = " + storeID + " AND P.productName = " + productName + ";");
+         List<List<String>> productAmntList = esql.executeQueryAndReturnResult(query);
+         int productAmnt = Integer.parseInt(productAmntList.get(0).get(0));
+         System.out.println(productAmnt);
+         productAmnt -= numberOfUnits;
+         System.out.println(productAmnt);
+
+         query = String.format("UPDATE Products P SET P.numberOfUnits = " + productAmnt + " WHERE P.storeID = " + storeID + ";");
+         esql.executeUpdate(query);
+         System.out.println ("Order successfully placed!");
+      }
+      catch(Exception e){
+         System.err.println (e.getMessage ());
+      }
+   }
+
    public static void viewRecentOrders(Retail esql) {}
    public static void updateProduct(Retail esql) {}
    public static void viewRecentUpdates(Retail esql) {}
