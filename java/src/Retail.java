@@ -40,6 +40,9 @@ public class Retail {
    static BufferedReader in = new BufferedReader(
                                 new InputStreamReader(System.in));
 
+   //keeps userID
+   private static int loggeduserID;
+
    /**
     * Creates a new instance of Retail shop
     *
@@ -385,6 +388,8 @@ public class Retail {
     * @return User login or null is the user does not exist
     **/
    public static String LogIn(Retail esql){
+      loggeduserID = -1;
+
       try{
          System.out.print("\tEnter name: ");
          String name = in.readLine();
@@ -393,8 +398,13 @@ public class Retail {
 
          String query = String.format("SELECT * FROM USERS WHERE name = '%s' AND password = '%s'", name, password);
          int userNum = esql.executeQuery(query);
-	 if (userNum > 0)
-		return name;
+
+         //update the logged userID for access in other functions
+         query = String.format("SELECT userID FROM Users  WHERE name = '%s' AND password = '%s'", name, password);
+         List<List<String>> a = esql.executeQueryAndReturnResult(query);
+         loggeduserID = Integer.parseInt(a.get(0).get(0));
+         if (userNum > 0)
+		      return name;
          return null;
       }catch(Exception e){
          System.err.println (e.getMessage ());
@@ -404,7 +414,16 @@ public class Retail {
 
 // Rest of the functions definition go in here
 
-   public static void viewStores(Retail esql) {}
+   public static void viewStores(Retail esql) {
+      try {
+         String Query = String.format("SELECT S.name as Stores FROM Store S, Users U WHERE U.userID = " + loggeduserID + " AND calculate_distance(U.latitude, u.longitude, s.latitude, s.longitude) < 30;");
+         esql.executeQueryAndPrintResult(Query);
+      }
+		catch(Exception e) {
+			System.err.println(e.getMessage());
+		}
+   }
+
    public static void viewProducts(Retail esql) {
       int storeID;
 
@@ -424,8 +443,8 @@ public class Retail {
       }
       
       try {
-			String esqlQuery = "SELECT P.productName, P.numberOfUnits, P.pricePerUnit FROM Product P, Store S WHERE S.storeID = " + storeID + " AND P.storeID = " + storeID + ";";
-		   esql.executeQueryAndPrintResult(esqlQuery);
+			String Query = "SELECT P.productName, P.numberOfUnits, P.pricePerUnit FROM Product P, Store S WHERE S.storeID = " + storeID + " AND P.storeID = " + storeID + ";";
+		   esql.executeQueryAndPrintResult(Query);
 		}
 		catch(Exception e) {
 			System.err.println(e.getMessage());
