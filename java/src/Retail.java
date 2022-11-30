@@ -513,14 +513,12 @@ public class Retail {
          String query = String.format("INSERT INTO ORDERS (customerID, storeID, productName, unitsOrdered, orderTime) VALUES (%s, %s, '%s', %s, DATE_TRUNC('second', CURRENT_TIMESTAMP::timestamp))", loggeduserID, storeID, productName, numberOfUnits);
          esql.executeUpdate(query);
          //subtracting the number of units from specific store
-         query = String.format("SELECT P.numberOfUnits FROM Product P WHERE P.storeID = " + storeID + " AND P.productName = " + productName + ";");
+         query = String.format("SELECT P.numberOfUnits FROM Product P WHERE P.storeID = " + storeID + " AND P.productName = '" + productName + "';");
          List<List<String>> productAmntList = esql.executeQueryAndReturnResult(query);
          int productAmnt = Integer.parseInt(productAmntList.get(0).get(0));
-         System.out.println(productAmnt);
          productAmnt -= numberOfUnits;
-         System.out.println(productAmnt);
 
-         query = String.format("UPDATE Products P SET P.numberOfUnits = " + productAmnt + " WHERE P.storeID = " + storeID + ";");
+         query = String.format("UPDATE Product SET numberOfUnits = " + productAmnt + " WHERE storeID = " + storeID + " AND productName = '" + productName + "';");
          esql.executeUpdate(query);
          System.out.println ("Order successfully placed!");
       }
