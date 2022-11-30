@@ -527,7 +527,16 @@ public class Retail {
       }
    }
 
-   public static void viewRecentOrders(Retail esql) {}
+   public static void viewRecentOrders(Retail esql) {
+      try {
+         String query = String.format("SELECT O.storeID, S.name, O.productName, O.unitsOrdered, O.orderTime FROM Orders O, Store S WHERE O.customerID = " + loggeduserID + " AND O.storeID = S.storeID ORDER BY orderTime DESC LIMIT 5;");
+         esql.executeQueryAndPrintResult(query);
+      }
+		catch(Exception e) {
+			System.err.println(e.getMessage());
+		}
+   }
+
    public static void updateProduct(Retail esql) {}
    public static void viewRecentUpdates(Retail esql) {}
    public static void viewPopularProducts(Retail esql) {}
