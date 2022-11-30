@@ -372,8 +372,20 @@ public class Retail {
          String latitude = in.readLine();       //enter lat value between [0.0, 100.0]
          System.out.print("\tEnter longitude: ");  //enter long value between [0.0, 100.0]
          String longitude = in.readLine();
-         
-         String type="Customer";
+         String type = "";
+         System.out.print("\tAre you a Manager or Admin? If yes, please enter the access password or press N if not: ");
+         String accessCode = in.readLine();
+
+         if (accessCode.equals("manager")) {
+            type = "Manager";
+         }
+         else if (accessCode.equals("admin")) {
+            type = "Admin";
+            System.out.println("Welcome Admin!");
+         }
+         else {
+            type = "Customer";
+         }
 
 			String query = String.format("INSERT INTO USERS (name, password, latitude, longitude, type) VALUES ('%s','%s', %s, %s,'%s')", name, password, latitude, longitude, type);
 
