@@ -563,8 +563,12 @@ public class Retail {
          List<List<String>> userTypeList = esql.executeQueryAndReturnResult(query);
          String userType = userTypeList.get(0).get(0).replaceAll("\\s+", "");
          if(userType.equals("manager")) {
-            query = String.format("SELECT O.orderNumber, U.name, O.storeID, O.productName, O.orderTime FROM Orders O, User U, Store S WHERE S.managerID = " + loggeduserID + " AND O.storeID = S.storeID AND U.userID = O.customerID ORDER BY orderTime DESC LIMIT 5;");
+            query = String.format("SELECT O.orderNumber, U.name, O.storeID, O.productName, O.orderTime FROM Orders O INNER JOIN Users U ON (O.customerID = U.userID), Store S WHERE S.managerID = " + loggeduserID + " AND O.storeID = S.storeID;");
             esql.executeQueryAndPrintResult(query);
+         }
+         else if (userType.equals("admin")) {
+            query = String.format("SELECT O.orderNumber, U.name, O.storeID, O.productName, O.orderTime FROM Orders O INNER JOIN Users U ON (O.customerID = U.userID), Store S WHERE O.storeID = S.storeID;");
+            esql.executeQueryAndPrintResult(query);            
          }
          else {
             System.out.println("You do not have access to this.");
