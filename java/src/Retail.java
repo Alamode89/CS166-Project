@@ -378,6 +378,11 @@ public class Retail {
 
          if (accessCode.equals("manager")) {
             type = "Manager";
+            System.out.println("Welcome Manager!");
+            /* must implement later
+            System.out.println("Please input the store ID you manage: ");
+            String storeID = in.readLine();
+            */
          }
          else if (accessCode.equals("admin")) {
             type = "Admin";
@@ -550,7 +555,30 @@ public class Retail {
    }
 
    public static void updateProduct(Retail esql) {}
-   public static void viewRecentUpdates(Retail esql) {}
+   public static void viewRecentUpdates(Retail esql) {
+      //check to make sure if type is manager or admin
+      //need to implement two queries where manager only sees their stores and admin sees all
+      try {
+         String query = String.format("SELECT type FROM Users WHERE userID = " + loggeduserID + ";");
+         List<List<String>> userTypeList = esql.executeQueryAndReturnResult(query);
+         String userType = userTypeList.get(0).get(0).replaceAll("\\s+", "");
+         if(userType.equals("manager")) {
+            query = String.format("SELECT O.orderNumber, U.name, O.storeID, O.productName, O.orderTime FROM Orders O INNER JOIN Users U ON (O.customerID = U.userID), Store S WHERE S.managerID = " + loggeduserID + " AND O.storeID = S.storeID;");
+            esql.executeQueryAndPrintResult(query);
+         }
+         else if (userType.equals("admin")) {
+            query = String.format("SELECT O.orderNumber, U.name, O.storeID, O.productName, O.orderTime FROM Orders O INNER JOIN Users U ON (O.customerID = U.userID), Store S WHERE O.storeID = S.storeID;");
+            esql.executeQueryAndPrintResult(query);            
+         }
+         else {
+            System.out.println("You do not have access to this.");
+            return;
+         }
+      }
+		catch(Exception e) {
+			System.err.println(e.getMessage());
+		}
+   }
    public static void viewPopularProducts(Retail esql) {}
    public static void viewPopularCustomers(Retail esql) {}
    public static void placeProductSupplyRequests(Retail esql) {}
