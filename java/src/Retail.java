@@ -586,7 +586,7 @@ public class Retail {
          String userType = userTypeList.get(0).get(0).replaceAll("\\s+", "");
          if(userType.equals("manager")) {
             System.out.println("\nThe 5 most popular products from your store(s) are:");
-            query = String.format("SELECT P.productname, SUM(O.unitsOrdered) AS NumOrdered FROM product P, users U, store S, orders O WHERE U.userID = '10' AND U.userID = S.managerID  AND S.storeID = P.storeID AND O.storeID = P.storeID AND P.productName = O.productname GROUP BY P.productname ORDER BY NumOrdered DESC LIMIT 5;");
+            query = String.format("SELECT P.productname, SUM(O.unitsOrdered) AS NumOrdered FROM product P, users U, store S, orders O WHERE U.userID = " + loggeduserID + " AND U.userID = S.managerID  AND S.storeID = P.storeID AND O.storeID = P.storeID AND P.productName = O.productname GROUP BY P.productname ORDER BY NumOrdered DESC LIMIT 5;");
             esql.executeQueryAndPrintResult(query);
             System.out.println("\n");            
          }
