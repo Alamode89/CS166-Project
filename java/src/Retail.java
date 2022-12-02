@@ -579,7 +579,26 @@ public class Retail {
 			System.err.println(e.getMessage());
 		}
    }
-   public static void viewPopularProducts(Retail esql) {}
+   public static void viewPopularProducts(Retail esql) {
+      try {
+         String query = String.format("SELECT type FROM Users WHERE userID = " + loggeduserID + ";");
+         List<List<String>> userTypeList = esql.executeQueryAndReturnResult(query);
+         String userType = userTypeList.get(0).get(0).replaceAll("\\s+", "");
+         if(userType.equals("manager")) {
+            System.out.println("\nThe 5 most popular products from your store(s) are:");
+            query = String.format("SELECT P.productname, SUM(O.unitsOrdered) AS NumOrdered FROM product P, users U, store S, orders O WHERE U.userID = '10' AND U.userID = S.managerID  AND S.storeID = P.storeID AND O.storeID = P.storeID AND P.productName = O.productname GROUP BY P.productname ORDER BY NumOrdered DESC LIMIT 5;");
+            esql.executeQueryAndPrintResult(query);
+            System.out.println("\n");            
+         }
+         else {
+            System.out.println("You do not have access to this.");
+            return;
+         }
+      }
+		catch(Exception e) {
+			System.err.println(e.getMessage());
+		}
+   }
    public static void viewPopularCustomers(Retail esql) {}
    public static void placeProductSupplyRequests(Retail esql) {}
 
