@@ -599,7 +599,26 @@ public class Retail {
 			System.err.println(e.getMessage());
 		}
    }
-   public static void viewPopularCustomers(Retail esql) {}
+   public static void viewPopularCustomers(Retail esql) {
+      try {
+         String query = String.format("SELECT type FROM Users WHERE userID = " + loggeduserID + ";");
+         List<List<String>> userTypeList = esql.executeQueryAndReturnResult(query);
+         String userType = userTypeList.get(0).get(0).replaceAll("\\s+", "");
+         if(userType.equals("manager")) {
+            System.out.println("\nThe information of your 5 most popular customers are:");
+            query = String.format("SELECT * FROM users U INNER JOIN (SELECT O.customerID, COUNT(O.customerID) as Number_of_Orders_Placed FROM orders O, users U, store S WHERE  U.userID = " + loggeduserID +" AND U.userID = S.managerID AND S.storeID = O.storeID GROUP BY O.customerID ORDER BY Number_of_Orders_Placed DESC) AS x ON U.userID = x.CustomerID ORDER BY Number_of_Orders_Placed DESC LIMIT 5;");
+            esql.executeQueryAndPrintResult(query);
+            System.out.println("\n");  
+         }
+         else {
+            System.out.println("You do not have access to this.");
+            return;
+         }
+      }
+		catch(Exception e) {
+			System.err.println(e.getMessage());
+		}
+   }
    public static void placeProductSupplyRequests(Retail esql) {}
 
 }//end Retail
