@@ -486,7 +486,7 @@ public class Retail {
             //throws error if out of range because the list is empty
             List<List<String>> storeList = esql.executeQueryAndReturnResult(Query); 
             if (storeList.size() <= 0) {
-               System.out.println("That store is too far. Please select a store within 30 miles.");
+               System.out.println("That store is too far or does not exist. Please select a store within 30 miles.");
                continue;
             }
             break;
