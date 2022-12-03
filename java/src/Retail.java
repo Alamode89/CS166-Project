@@ -626,8 +626,7 @@ public class Retail {
                updated_num_units = Integer.parseInt(in.readLine());
 
                System.out.print("Update the price of " + product_to_update + ": ");
-               updated_price_per_unit = Integer.parseInt(in.readLine());
-
+               updated_price_per_unit = Integer.parseInt(in.readLine()); 
                query = String.format("UPDATE product P SET numberofUnits = " + updated_num_units + ", pricePerUnit = " + updated_price_per_unit + " FROM users U JOIN store S ON S.managerID = U.userID WHERE U.userID = " + loggeduserID + " AND S.storeID = " + storeID + " AND S.storeID = P.storeID AND P.productName = \'" + product_to_update + "\';");
                //query = String.format("WITH T AS (SELECT P1.storeID, P1.productName, P1.numberOfUnits, P1.pricePerUnit FROM product P1 INNER JOIN store S ON P1.storeID = S.storeID INNER JOIN users U ON S.managerID = U.userID WHERE U.userID = " + loggeduserID + " AND S.storeID = " + storeID + " AND P1.productName = \'" + product_to_update + "\')UPDATE product P SET numberofUnits = " + updated_num_units + ", pricePerUnit = " + updated_price_per_unit + " FROM T WHERE P.storeID = T.storeID AND P.productName = T.productName;");
                System.out.print("Successfully updated %s at Store %d", product_to_update, storeID);
