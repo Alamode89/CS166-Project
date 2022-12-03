@@ -554,7 +554,10 @@ public class Retail {
 		}
    }
 
-   public static void updateProduct(Retail esql) {}
+   public static void updateProduct(Retail esql) {
+
+
+   }
    public static void viewRecentUpdates(Retail esql) {
       //check to make sure if type is manager or admin
       //need to implement two queries where manager only sees their stores and admin sees all
@@ -580,39 +583,61 @@ public class Retail {
 		}
    }
    public static void viewPopularProducts(Retail esql) {
+      int storeID;
       try {
          String query = String.format("SELECT type FROM Users WHERE userID = " + loggeduserID + ";");
          List<List<String>> userTypeList = esql.executeQueryAndReturnResult(query);
          String userType = userTypeList.get(0).get(0).replaceAll("\\s+", "");
-         if(userType.equals("manager")) {
-            System.out.println("\nThe 5 most popular products from your store(s) are:");
-            query = String.format("SELECT P.productname, SUM(O.unitsOrdered) AS NumOrdered FROM product P, users U, store S, orders O WHERE U.userID = " + loggeduserID + " AND U.userID = S.managerID  AND S.storeID = P.storeID AND O.storeID = P.storeID AND P.productName = O.productname GROUP BY P.productname ORDER BY NumOrdered DESC LIMIT 5;");
-            esql.executeQueryAndPrintResult(query);
-            System.out.println("\n");            
+
+         if (userType.equals("manager")) {
+            System.out.print("Enter Store ID: ");
+            storeID = Integer.parseInt(in.readLine());
+            if(storeID > 20) {
+               System.out.println("Invalid Store ID.\n");
+               return;
+            }
+            else {
+               System.out.println("\nTop 5 products from Store " + storeID + ": ");
+               query = String.format("SELECT P.productname, COUNT(O.unitsOrdered) AS Number_of_Times_Ordered FROM product P, users U, store S, orders O WHERE U.userID = " + loggeduserID + " AND U.userID = S.managerID  AND S.storeID = " + storeID + " AND S.storeID = P.storeID AND O.storeID = P.storeID AND P.productName = O.productname GROUP BY P.productname ORDER BY Number_of_Times_Ordered DESC LIMIT 5;");
+               esql.executeQueryAndPrintResult(query);
+               System.out.println("\n"); 
+            }           
          }
          else {
-            System.out.println("You do not have access to this.");
-            return;
+            System.out.println("You do not have access to this.\n");
+            return;            
          }
       }
 		catch(Exception e) {
 			System.err.println(e.getMessage());
 		}
    }
+
    public static void viewPopularCustomers(Retail esql) {
+      int storeID;
       try {
          String query = String.format("SELECT type FROM Users WHERE userID = " + loggeduserID + ";");
          List<List<String>> userTypeList = esql.executeQueryAndReturnResult(query);
          String userType = userTypeList.get(0).get(0).replaceAll("\\s+", "");
-         if(userType.equals("manager")) {
-            System.out.println("\nThe information of your 5 most popular customers are:");
-            query = String.format("SELECT * FROM users U INNER JOIN (SELECT O.customerID, COUNT(O.customerID) as Number_of_Orders_Placed FROM orders O, users U, store S WHERE  U.userID = " + loggeduserID +" AND U.userID = S.managerID AND S.storeID = O.storeID GROUP BY O.customerID ORDER BY Number_of_Orders_Placed DESC) AS x ON U.userID = x.CustomerID ORDER BY Number_of_Orders_Placed DESC LIMIT 5;");
-            esql.executeQueryAndPrintResult(query);
-            System.out.println("\n");  
+
+         if (userType.equals("manager")) {
+            System.out.print("Enter Store ID: ");
+            storeID = Integer.parseInt(in.readLine());
+            if(storeID > 20) {
+               System.out.println("Invalid Store ID.\n");
+               return;
+            }
+            
+            else {
+               System.out.println("\nTop 5 customers from Store " + storeID + ": ");
+               query = String.format("SELECT * FROM users U INNER JOIN (SELECT O.customerID, COUNT(O.customerID) as Number_of_Orders_Placed FROM orders O, users U, store S WHERE  U.userID = " + loggeduserID +" AND U.userID = S.managerID AND S.storeID = " + storeID + " AND S.storeID = O.storeID GROUP BY O.customerID ORDER BY Number_of_Orders_Placed DESC) AS x ON U.userID = x.CustomerID ORDER BY Number_of_Orders_Placed DESC LIMIT 5;");
+               esql.executeQueryAndPrintResult(query);
+               System.out.println("\n");
+            }
          }
          else {
-            System.out.println("You do not have access to this.");
-            return;
+            System.out.println("You do not have access to this.\n");
+            return;            
          }
       }
 		catch(Exception e) {
