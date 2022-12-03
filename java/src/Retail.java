@@ -592,7 +592,7 @@ public class Retail {
          if (userType.equals("manager")) {
             System.out.print("Enter Store ID: ");
             storeID = Integer.parseInt(in.readLine());
-            if(storeID > 20) {
+            if(storeID > 20 || storeID == 0) {
                System.out.println("Invalid Store ID.\n");
                return;
             }
@@ -623,7 +623,7 @@ public class Retail {
          if (userType.equals("manager")) {
             System.out.print("Enter Store ID: ");
             storeID = Integer.parseInt(in.readLine());
-            if(storeID > 20) {
+            if(storeID > 20 || storeID == 0) {
                System.out.println("Invalid Store ID.\n");
                return;
             }
