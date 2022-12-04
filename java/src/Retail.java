@@ -283,7 +283,7 @@ public class Retail {
             if (authorisedUser != null) {
               boolean usermenu = true;
               while(usermenu) {
-                System.out.println("MAIN MENU");
+                System.out.println("\nMAIN MENU");
                 System.out.println("---------");
                 System.out.println("1. View Stores within 30 miles");
                 System.out.println("2. View Product List");
@@ -347,7 +347,7 @@ public class Retail {
       int input;
       // returns only if a correct value is given.
       do {
-         System.out.print("Please make your choice: ");
+         System.out.print("\nPlease make your choice: ");
          try { // read the integer, parse it and break.
             input = Integer.parseInt(in.readLine());
             break;
@@ -435,7 +435,8 @@ public class Retail {
 
    public static void viewStores(Retail esql) {
       try {
-         String Query = String.format("SELECT S.name as Stores FROM Store S, Users U WHERE U.userID = " + loggeduserID + " AND calculate_distance(U.latitude, u.longitude, s.latitude, s.longitude) < 30;");
+         String Query = String.format("SELECT S.storeID as Store_ID, S.name as Store_Name FROM Store S, Users U WHERE U.userID = " + loggeduserID + " AND calculate_distance(U.latitude, u.longitude, s.latitude, s.longitude) < 30;");
+         System.out.println("\nStores within 30 miles:");
          esql.executeQueryAndPrintResult(Query);
       }
 		catch(Exception e) {
@@ -445,25 +446,16 @@ public class Retail {
 
    public static void viewProducts(Retail esql) {
       int storeID;
-
-      //get storeID
-
-      while(true) {
-         System.out.print("Enter Store ID: ");
-         try {
-				storeID = Integer.parseInt(in.readLine());
-				break;
-			}
-			catch(Exception e) {
-				System.out.println("Not a valid Store ID");
-				System.out.println(e);
-				continue;
-			}
-      }
-      
       try {
-			String Query = "SELECT P.productName, P.numberOfUnits, P.pricePerUnit FROM Product P, Store S WHERE S.storeID = " + storeID + " AND P.storeID = " + storeID + ";";
-		   esql.executeQueryAndPrintResult(Query);
+         System.out.print("Enter Store ID: ");
+         storeID = Integer.parseInt(in.readLine());
+         if(storeID > 20 || storeID == 0) {
+            System.out.println("Invalid Store ID.");
+            return;
+         }   
+			String Query = ("SELECT P.productName, P.numberOfUnits, P.pricePerUnit FROM Product P, Store S WHERE S.storeID = " + storeID + " AND P.storeID = " + storeID + ";");
+		   System.out.println("\nProducts available at Store " + storeID + ":");
+         esql.executeQueryAndPrintResult(Query);
 		}
 		catch(Exception e) {
 			System.err.println(e.getMessage());
@@ -569,19 +561,19 @@ public class Retail {
             System.out.print("Enter Store ID: ");
             storeID = Integer.parseInt(in.readLine());
             if(storeID > 20 || storeID == 0) {
-               System.out.println("Invalid Store ID.\n");
+               System.out.println("Invalid Store ID.");
                return;
             }
 
-            query = String.format("SELECT * FROM store WHERE managerID = " + loggeduserID + " AND storeID = " + storeID + ";");
-            esql.executeQueryAndPrintResult(query);
-            if (esql != null) {
-               System.out.println("You are not the manager of store " + storeID + "\n");
-               return;
-            }
+            //query = String.format("SELECT storeID, name, managerID FROM store WHERE managerID = " + loggeduserID + " AND storeID = " + storeID + ";");
+            //esql.executeQueryAndPrintResult(query);
+            //if (esql != null) {
+               //System.out.println("\nYou are not the manager of Store " + storeID + "\n");
+               //return;
+            //}
 
-            else {
-               System.out.println("\t1. 7up");
+            else /*if (esql == null)*/{
+               System.out.println("\n\t1. 7up");
                System.out.println("\t2. Brisk");
                System.out.println("\t3. Donuts");
                System.out.println("\t4. Egg");
@@ -636,14 +628,13 @@ public class Retail {
 
                query = String.format("UPDATE product P SET numberofUnits = " + updated_num_units + ", pricePerUnit = " + updated_price_per_unit + " FROM users U JOIN store S ON S.managerID = U.userID WHERE U.userID = " + loggeduserID + " AND S.storeID = " + storeID + " AND S.storeID = P.storeID AND P.productName = \'" + product_to_update + "\';");
                query = String.format("INSERT INTO productupdates (managerID, storeID, productName, updatedOn) VALUES (%s, %s,'%s', CURRENT_TIMESTAMP(0))",  loggeduserID, storeID, product_to_update);
-               
+                  
                System.out.printf("\nSuccessfully updated %s at Store %d", product_to_update, storeID);
                System.out.println("\nSuccessfully updated productUpdates table\n");
 
                esql.executeQueryAndPrintResult(query);
                esql.executeQueryAndPrintResult(query);
-               
-            }      
+            }        
          }
          else {
             System.out.println("You do not have access to this.\n");
@@ -670,12 +661,12 @@ public class Retail {
                return;
             }
 
-            query = String.format("SELECT * FROM store WHERE managerID = " + loggeduserID + " AND storeID = " + storeID + ";");
-            esql.executeQueryAndPrintResult(query);
-            if (esql != null) {
-               System.out.println("You are not the manager of store " + storeID + "\n");
-               return;
-            }
+            //query = String.format("SELECT * FROM store WHERE managerID = " + loggeduserID + " AND storeID = " + storeID + ";");
+            //esql.executeQueryAndPrintResult(query);
+            //if (esql != null) {
+               //System.out.println("You are not the manager of store " + storeID + "\n");
+               //return;
+            //}
             
             System.out.println("The most recent updates to the products of Store " + storeID + " are: ");
             query = String.format("SELECT P.updatenumber, P.managerId, P.storeID, P.productName, P.updatedOn FROM productUpdates P WHERE P.managerID = " + loggeduserID + " AND P.storeID = " + storeID  + " ORDER BY P.updateNumber DESC LIMIT 5;");
@@ -691,12 +682,12 @@ public class Retail {
                return;
             }
 
-            query = String.format("SELECT * FROM store WHERE managerID = " + loggeduserID + " AND storeID = " + storeID + ";");
-            esql.executeQueryAndPrintResult(query);
-            if (esql != null) {
-               System.out.println("You are not the admin of store " + storeID + "\n");
-               return;
-            }
+            //query = String.format("SELECT * FROM store WHERE managerID = " + loggeduserID + " AND storeID = " + storeID + ";");
+            //esql.executeQueryAndPrintResult(query);
+            //if (esql != null) {
+               //System.out.println("You are not the admin of store " + storeID + "\n");
+               //return;
+            //}
             
             System.out.println("The most recent updates to the products of Store " + storeID + " are: ");
             query = String.format("SELECT P.updatenumber, P.managerId, P.storeID, P.productName, P.updatedOn FROM productUpdates P WHERE P.managerID = " + loggeduserID + " AND P.storeID = " + storeID  + " ORDER BY P.updateNumber DESC LIMIT 5;");
@@ -726,12 +717,12 @@ public class Retail {
                return;
             }
 
-            query = String.format("SELECT * FROM store WHERE managerID = " + loggeduserID + " AND storeID = " + storeID + ";");
-            esql.executeQueryAndPrintResult(query);
-            if (esql != null) {
-               System.out.println("You are not the manager of store " + storeID + "\n");
-               return;
-            }
+            //query = String.format("SELECT * FROM store WHERE managerID = " + loggeduserID + " AND storeID = " + storeID + ";");
+            //esql.executeQueryAndPrintResult(query);
+            //if (esql != null) {
+               //System.out.println("You are not the manager of store " + storeID + "\n");
+               //return;
+            //}
 
             else {
                System.out.println("\nTop 5 products from Store " + storeID + ": ");
@@ -765,11 +756,11 @@ public class Retail {
                return;
             }
             
-            query = String.format("SELECT * FROM store WHERE managerID = " + loggeduserID + " AND storeID = " + storeID + ";");
-            esql.executeQueryAndPrintResult(query);
-            if (esql != null) {
-               System.out.println("You are not the manager of store " + storeID + "\n");
-               return;
+            //query = String.format("SELECT * FROM store WHERE managerID = " + loggeduserID + " AND storeID = " + storeID + ";");
+            //esql.executeQueryAndPrintResult(query);
+            //if (esql != null) {
+               //System.out.println("You are not the manager of store " + storeID + "\n");
+               //return;
             }
 
             else {
