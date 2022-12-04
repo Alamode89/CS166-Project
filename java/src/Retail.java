@@ -573,6 +573,13 @@ public class Retail {
                return;
             }
 
+            query = String.format("SELECT * FROM store WHERE managerID = " + loggeduserID + " AND storeID = " + storeID + ";");
+            esql.executeQueryAndPrintResult(query);
+            if (esql != null) {
+               System.out.println("You are not the manager of store " + storeID + "\n");
+               return;
+            }
+
             else {
                System.out.println("\t1. 7up");
                System.out.println("\t2. Brisk");
@@ -624,14 +631,18 @@ public class Retail {
 
                System.out.printf("Update the number of units of %s: ", product_to_update);
                updated_num_units = Integer.parseInt(in.readLine());
-
                System.out.print("Update the price of " + product_to_update + ": ");
                updated_price_per_unit = Integer.parseInt(in.readLine()); 
+
                query = String.format("UPDATE product P SET numberofUnits = " + updated_num_units + ", pricePerUnit = " + updated_price_per_unit + " FROM users U JOIN store S ON S.managerID = U.userID WHERE U.userID = " + loggeduserID + " AND S.storeID = " + storeID + " AND S.storeID = P.storeID AND P.productName = \'" + product_to_update + "\';");
-               //query = String.format("WITH T AS (SELECT P1.storeID, P1.productName, P1.numberOfUnits, P1.pricePerUnit FROM product P1 INNER JOIN store S ON P1.storeID = S.storeID INNER JOIN users U ON S.managerID = U.userID WHERE U.userID = " + loggeduserID + " AND S.storeID = " + storeID + " AND P1.productName = \'" + product_to_update + "\')UPDATE product P SET numberofUnits = " + updated_num_units + ", pricePerUnit = " + updated_price_per_unit + " FROM T WHERE P.storeID = T.storeID AND P.productName = T.productName;");
-               System.out.print("Successfully updated %s at Store %d", product_to_update, storeID);
+               query = String.format("INSERT INTO productupdates (managerID, storeID, productName, updatedOn) VALUES (%s, %s,'%s', CURRENT_TIMESTAMP(0))",  loggeduserID, storeID, product_to_update);
+               
+               System.out.printf("\nSuccessfully updated %s at Store %d", product_to_update, storeID);
+               System.out.println("\nSuccessfully updated productUpdates table\n");
+
                esql.executeQueryAndPrintResult(query);
-               System.out.println("\n"); 
+               esql.executeQueryAndPrintResult(query);
+               
             }      
          }
          else {
@@ -651,11 +662,44 @@ public class Retail {
          List<List<String>> userTypeList = esql.executeQueryAndReturnResult(query);
          String userType = userTypeList.get(0).get(0).replaceAll("\\s+", "");
          if(userType.equals("manager")) {
-            query = String.format("SELECT O.orderNumber, U.name, O.storeID, O.productName, O.orderTime FROM Orders O INNER JOIN Users U ON (O.customerID = U.userID), Store S WHERE S.managerID = " + loggeduserID + " AND O.storeID = S.storeID;");
+            int storeID;
+            System.out.print("Enter Store ID: ");
+            storeID = Integer.parseInt(in.readLine());
+            if(storeID > 20 || storeID == 0) {
+               System.out.println("Invalid Store ID.\n");
+               return;
+            }
+
+            query = String.format("SELECT * FROM store WHERE managerID = " + loggeduserID + " AND storeID = " + storeID + ";");
             esql.executeQueryAndPrintResult(query);
+            if (esql != null) {
+               System.out.println("You are not the manager of store " + storeID + "\n");
+               return;
+            }
+            
+            System.out.println("The most recent updates to the products of Store " + storeID + " are: ");
+            query = String.format("SELECT P.updatenumber, P.managerId, P.storeID, P.productName, P.updatedOn FROM productUpdates P WHERE P.managerID = " + loggeduserID + " AND P.storeID = " + storeID  + " ORDER BY P.updateNumber DESC LIMIT 5;");
+            esql.executeQueryAndPrintResult(query);
+            System.out.println("\n");
          }
          else if (userType.equals("admin")) {
-            query = String.format("SELECT O.orderNumber, U.name, O.storeID, O.productName, O.orderTime FROM Orders O INNER JOIN Users U ON (O.customerID = U.userID), Store S WHERE O.storeID = S.storeID;");
+            int storeID;
+            System.out.print("Enter Store ID: ");
+            storeID = Integer.parseInt(in.readLine());
+            if(storeID > 20 || storeID == 0) {
+               System.out.println("Invalid Store ID.\n");
+               return;
+            }
+
+            query = String.format("SELECT * FROM store WHERE managerID = " + loggeduserID + " AND storeID = " + storeID + ";");
+            esql.executeQueryAndPrintResult(query);
+            if (esql != null) {
+               System.out.println("You are not the manager of store " + storeID + "\n");
+               return;
+            }
+            
+            System.out.println("The most recent updates to the products of Store " + storeID + " are: ");
+            query = String.format("SELECT P.updatenumber, P.managerId, P.storeID, P.productName, P.updatedOn FROM productUpdates P WHERE P.managerID = " + loggeduserID + " AND P.storeID = " + storeID  + " ORDER BY P.updateNumber DESC LIMIT 5;");
             esql.executeQueryAndPrintResult(query);            
          }
          else {
