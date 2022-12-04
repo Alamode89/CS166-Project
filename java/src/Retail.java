@@ -694,7 +694,7 @@ public class Retail {
             query = String.format("SELECT * FROM store WHERE managerID = " + loggeduserID + " AND storeID = " + storeID + ";");
             esql.executeQueryAndPrintResult(query);
             if (esql != null) {
-               System.out.println("You are not the manager of store " + storeID + "\n");
+               System.out.println("You are not the admin of store " + storeID + "\n");
                return;
             }
             
@@ -725,6 +725,14 @@ public class Retail {
                System.out.println("Invalid Store ID.\n");
                return;
             }
+
+            query = String.format("SELECT * FROM store WHERE managerID = " + loggeduserID + " AND storeID = " + storeID + ";");
+            esql.executeQueryAndPrintResult(query);
+            if (esql != null) {
+               System.out.println("You are not the manager of store " + storeID + "\n");
+               return;
+            }
+
             else {
                System.out.println("\nTop 5 products from Store " + storeID + ": ");
                query = String.format("SELECT P.productname, COUNT(O.unitsOrdered) AS Number_of_Times_Ordered FROM product P, users U, store S, orders O WHERE U.userID = " + loggeduserID + " AND U.userID = S.managerID  AND S.storeID = " + storeID + " AND S.storeID = P.storeID AND O.storeID = P.storeID AND P.productName = O.productname GROUP BY P.productname ORDER BY Number_of_Times_Ordered DESC LIMIT 5;");
@@ -757,6 +765,13 @@ public class Retail {
                return;
             }
             
+            query = String.format("SELECT * FROM store WHERE managerID = " + loggeduserID + " AND storeID = " + storeID + ";");
+            esql.executeQueryAndPrintResult(query);
+            if (esql != null) {
+               System.out.println("You are not the manager of store " + storeID + "\n");
+               return;
+            }
+
             else {
                System.out.println("\nYour top 5 customers from Store " + storeID + ": ");
                query = String.format("SELECT * FROM users U INNER JOIN (SELECT O.customerID, COUNT(O.customerID) as Number_of_Orders_Placed FROM orders O, users U, store S WHERE  U.userID = " + loggeduserID +" AND U.userID = S.managerID AND S.storeID = " + storeID + " AND S.storeID = O.storeID GROUP BY O.customerID ORDER BY Number_of_Orders_Placed DESC) AS x ON U.userID = x.CustomerID ORDER BY Number_of_Orders_Placed DESC LIMIT 5;");
