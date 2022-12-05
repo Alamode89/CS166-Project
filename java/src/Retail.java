@@ -614,7 +614,7 @@ public class Retail {
                   product_to_update = "Pepsi";
                }
                else if (product_num == 10) {
-                  product_to_update = "Lemonade";
+                  product_to_update = "Pudding";
                }
                else if (product_num > 10 || product_num < 1){
                   System.out.println("No such product.\n");
@@ -632,8 +632,8 @@ public class Retail {
                System.out.printf("\nSuccessfully updated %s at Store %d", product_to_update, storeID);
                System.out.println("\nSuccessfully updated productUpdates table\n");
 
-               esql.executeQueryAndPrintResult(query);
-               esql.executeQueryAndPrintResult(query);
+               esql.executeUpdate(query);
+               esql.executeUpdate(query);
             }        
          }
          else {
@@ -724,17 +724,17 @@ public class Retail {
                //return;
             //}
 
-            else {
-               System.out.println("\nTop 5 products from Store " + storeID + ": ");
-               query = String.format("SELECT P.productname, COUNT(O.unitsOrdered) AS Number_of_Times_Ordered FROM product P, users U, store S, orders O WHERE U.userID = " + loggeduserID + " AND U.userID = S.managerID  AND S.storeID = " + storeID + " AND S.storeID = P.storeID AND O.storeID = P.storeID AND P.productName = O.productname GROUP BY P.productname ORDER BY Number_of_Times_Ordered DESC LIMIT 5;");
-               esql.executeQueryAndPrintResult(query);
-               System.out.println("\n"); 
-            }           
+            //else {
+            System.out.println("\nTop 5 products from Store " + storeID + ": ");
+            query = String.format("SELECT P.productname, COUNT(O.unitsOrdered) AS Number_of_Times_Ordered FROM product P, users U, store S, orders O WHERE U.userID = " + loggeduserID + " AND U.userID = S.managerID  AND S.storeID = " + storeID + " AND S.storeID = P.storeID AND O.storeID = P.storeID AND P.productName = O.productname GROUP BY P.productname ORDER BY Number_of_Times_Ordered DESC LIMIT 5;");
+            esql.executeQueryAndPrintResult(query);
+            System.out.println("\n"); 
+            //}           
          }
          else {
             System.out.println("You do not have access to this.\n");
             return;            
-         }
+        }
       }
 		catch(Exception e) {
 			System.err.println(e.getMessage());
@@ -761,14 +761,12 @@ public class Retail {
             //if (esql != null) {
                //System.out.println("You are not the manager of store " + storeID + "\n");
                //return;
-            }
 
-            else {
-               System.out.println("\nYour top 5 customers from Store " + storeID + ": ");
-               query = String.format("SELECT * FROM users U INNER JOIN (SELECT O.customerID, COUNT(O.customerID) as Number_of_Orders_Placed FROM orders O, users U, store S WHERE  U.userID = " + loggeduserID +" AND U.userID = S.managerID AND S.storeID = " + storeID + " AND S.storeID = O.storeID GROUP BY O.customerID ORDER BY Number_of_Orders_Placed DESC) AS x ON U.userID = x.CustomerID ORDER BY Number_of_Orders_Placed DESC LIMIT 5;");
-               esql.executeQueryAndPrintResult(query);
-               System.out.println("\n");
-            }
+         //else {
+         System.out.println("\nYour top 5 customers from Store " + storeID + ": ");
+         query = String.format("SELECT * FROM users U INNER JOIN (SELECT O.customerID, COUNT(O.customerID) as Number_of_Orders_Placed FROM orders O, users U, store S WHERE  U.userID = " + loggeduserID +" AND U.userID = S.managerID AND S.storeID = " + storeID + " AND S.storeID = O.storeID GROUP BY O.customerID ORDER BY Number_of_Orders_Placed DESC) AS x ON U.userID = x.CustomerID ORDER BY Number_of_Orders_Placed DESC LIMIT 5;");
+         esql.executeQueryAndPrintResult(query);
+         System.out.println("\n");
          }
          else {
             System.out.println("You do not have access to this.\n");
@@ -779,7 +777,112 @@ public class Retail {
 			System.err.println(e.getMessage());
 		}
    }
-   public static void placeProductSupplyRequests(Retail esql) {}
+   public static void placeProductSupplyRequests(Retail esql) {
+      int storeID;
+      int product_num;
+      String product_to_order = "";
+      int num_units_needed;
+      int warehouse_num;
+      int productAmnt;
+      try {
+         String query = String.format("SELECT type FROM Users WHERE userID = " + loggeduserID + ";");
+         List<List<String>> userTypeList = esql.executeQueryAndReturnResult(query);
+         String userType = userTypeList.get(0).get(0).replaceAll("\\s+", "");
+
+         if (userType.equals("manager")) {
+            System.out.print("Enter Store ID: ");
+            storeID = Integer.parseInt(in.readLine());
+            query = String.format("SELECT storeID FROM store WHERE storeID = " + storeID + " AND managerID = " + loggeduserID + ";");
+            List<List<String>> storeIDList = esql.executeQueryAndReturnResult(query);
+            int enteredstoreID = Integer.parseInt(storeIDList.get(0).get(0));
+            if(storeID > 20 || storeID == 0) {
+               System.out.println("Invalid Store ID.\n");
+               return;
+            }
+            else if (enteredstoreID.equals("")) {
+               System.out.println("You are not the manager of this store. \n");
+               return;
+            }
+            else /*if (esql == null)*/{
+               System.out.println("\n\t1. 7up");
+               System.out.println("\t2. Brisk");
+               System.out.println("\t3. Donuts");
+               System.out.println("\t4. Egg");
+               System.out.println("\t5. Hot and Sour Soup");
+               System.out.println("\t6. Ice Cream");
+               System.out.println("\t7. Lemonade");
+               System.out.println("\t8. Orange Juice");
+               System.out.println("\t9. Pepsi");
+               System.out.println("\t10. Pudding");
+               System.out.print("Enter the number of the product you want to place an order for: ");
+               product_num = Integer.parseInt(in.readLine());
+
+               if (product_num == 1) {
+                  product_to_order = "7up";
+               }
+               else if (product_num == 2) {
+                  product_to_order = "Brisk";
+               }
+               else if (product_num == 3) {
+                  product_to_order = "Donuts";
+               }
+               else if (product_num == 4) {
+                  product_to_order = "Egg";
+               }
+               else if (product_num == 5) {
+                  product_to_order = "Hot and Sour Soup";
+               }
+               else if (product_num == 6) {
+                  product_to_order = "Ice Cream";
+               }
+               else if (product_num == 7) {
+                  product_to_order = "Lemonade";
+               }
+               else if (product_num == 8) {
+                  product_to_order = "Orange Juice";
+               }
+               else if (product_num == 9) {
+                  product_to_order = "Pepsi";
+               }
+               else if (product_num == 10) {
+                  product_to_order = "Pudding";
+               }
+               else if (product_num > 10 || product_num < 1){
+                  System.out.println("No such product.\n");
+                  return;
+               }
+
+               System.out.printf("Number of units of %s needed: ", product_to_order);
+               num_units_needed = Integer.parseInt(in.readLine());
+               System.out.print("Enter the warehouse ID you'd like to place an order for " + product_to_order + " from: ");
+               warehouse_num = Integer.parseInt(in.readLine()); 
+               if (warehouse_num < 0 || warehouse_num > 5) {
+                  System.out.println("No such warehouse.");
+                  return;
+               }
+               else {
+                  System.out.println ("\nOrder from Warehouse " + warehouse_num + " successfully placed! \n");
+                  query = String.format("SELECT P.numberOfUnits FROM Product P WHERE P.storeID = " + storeID + " AND P.productName = '" + product_to_order + "';");
+                  esql.executeQuery(query);
+                  List<List<String>> productAmntList = esql.executeQueryAndReturnResult(query);
+                  productAmnt = Integer.parseInt(productAmntList.get(0).get(0));
+                  productAmnt += num_units_needed;
+                  query = String.format("UPDATE product P SET numberofUnits = " + productAmnt + " FROM store S WHERE S.managerID = " + loggeduserID + " AND S.storeID = " + storeID + " AND P.storeID = S.storeID AND P.productName = '" + product_to_order + "';");
+                  esql.executeUpdate(query);
+                  query = String.format("INSERT INTO productSupplyRequests (managerID, warehouseID, storeID, productName, unitsRequested) VALUES ( %s, %s, %s, '%s', %s )", loggeduserID, warehouse_num, storeID, product_to_order, num_units_needed);
+                  esql.executeUpdate(query);
+               }
+            }
+         }
+         else {
+            System.out.println("You do not have access to this.\n");
+            return;            
+         }
+      }
+      catch(Exception e) {
+			System.err.println(e.getMessage());
+		}
+   }
 
 }//end Retail
 
