@@ -296,7 +296,7 @@ public class Retail {
                 System.out.println("7. View 5 Popular Items");
                 System.out.println("8. View 5 Popular Customers");
                 System.out.println("9. Place Product Supply Request to Warehouse");
-
+                System.out.println("10. Administrator User Update");
                 System.out.println(".........................");
                 System.out.println("20. Log out");
                 switch (readChoice()){
@@ -309,7 +309,7 @@ public class Retail {
                    case 7: viewPopularProducts(esql); break;
                    case 8: viewPopularCustomers(esql); break;
                    case 9: placeProductSupplyRequests(esql); break;
-
+                   case 10: updateUser(esql); break;
                    case 20: usermenu = false; break;
                    default : System.out.println("Unrecognized choice!"); break;
                 }
@@ -373,23 +373,15 @@ public class Retail {
          System.out.print("\tEnter longitude: ");  //enter long value between [0.0, 100.0]
          String longitude = in.readLine();
          String type = "";
-         System.out.print("\tAre you a Manager or Admin? If yes, please enter the access password or press N if not: ");
+         System.out.print("\tAre you an Admin? If yes, please enter the access password or press enter if not: ");
          String accessCode = in.readLine();
 
-         if (accessCode.equals("manager")) {
-            type = "Manager";
-            System.out.println("Welcome Manager!");
-            /* must implement later
-            System.out.println("Please input the store ID you manage: ");
-            String storeID = in.readLine();
-            */
-         }
-         else if (accessCode.equals("admin")) {
-            type = "Admin";
+         if (accessCode.equals("admin")) {
+            type = "admin";
             System.out.println("Welcome Admin!");
          }
          else {
-            type = "Customer";
+            type = "customer";
          }
 
 			String query = String.format("INSERT INTO USERS (name, password, latitude, longitude, type) VALUES ('%s','%s', %s, %s,'%s')", name, password, latitude, longitude, type);
@@ -892,6 +884,94 @@ public class Retail {
       catch(Exception e) {
 			System.err.println(e.getMessage());
 		}
+   }
+
+   public static void updateUser(Retail esql) {
+      int userID;
+      int updateNumber;
+      String name;
+      String password;
+      String latitude;
+      String longitude;
+      String query;
+      //check if user is an Admin
+      try {
+         query = String.format("SELECT type FROM Users WHERE userID = " + loggeduserID + ";");
+         List<List<String>> userTypeList = esql.executeQueryAndReturnResult(query);
+         String userType = userTypeList.get(0).get(0).replaceAll("\\s+", "");
+         if(!userType.equals("admin")) {
+            System.out.println("You are not an administrator.");
+            return;
+         }
+      }
+      catch(Exception e) {
+         System.err.println(e.getMessage());
+      }
+
+      //Ask admin what user they want to update
+      while(true) {
+         //check if valid userID
+         try {
+            System.out.println("\nEnter userID that you would like to update: ");
+            userID = Integer.parseInt(in.readLine());
+            query = String.format("SELECT name FROM Users WHERE userID = " + userID + ";");
+            List<List<String>> userExistsList = esql.executeQueryAndReturnResult(query);
+            if(userExistsList.size() <= 0) {
+               System.out.println("This user does not exist, please enter a valid userID");
+               continue;
+            }
+            break;
+         }
+         catch(Exception e) {
+            System.err.println(e.getMessage());
+         }
+      }
+
+      while(true) {
+         try {
+            System.out.println("1. Name");
+            System.out.println("2. Password");
+            System.out.println("3. Latitude");
+            System.out.println("4. Longitude");
+            System.out.println("\nWhat would you like to update: ");
+            updateNumber = Integer.parseInt(in.readLine());
+            if(updateNumber == 1) {
+               System.out.println("\nEnter the new name: ");
+               name = in.readLine();
+               query = String.format("UPDATE Users U SET name = '" + name + "' WHERE userID = " + userID + ";");
+               esql.executeUpdate(query);
+               System.out.println("Name successfully updated!");
+               break;
+            }
+            else if(updateNumber == 2) {
+               System.out.println("\nEnter the new password: ");
+               password = in.readLine();
+               query = String.format("UPDATE Users U SET password = '" + password + "' WHERE userID = " + userID + ";");
+               esql.executeUpdate(query);
+               System.out.println("Password successfully updated!");
+               break;
+            }
+            else if(updateNumber == 3) {
+               System.out.println("\nEnter the new latitude: ");
+               latitude = in.readLine();
+               query = String.format("UPDATE Users U SET latitude = " + latitude + " WHERE userID = " + userID + ";");
+               esql.executeUpdate(query);
+               System.out.println("Latitude successfully updated!");
+               break;
+            }
+            else if(updateNumber == 4) {
+               System.out.println("\nEnter the new latitude: ");
+               longitude = in.readLine();
+               query = String.format("UPDATE Users U SET latitude = " + longitude + " WHERE userID = " + userID + ";");
+               esql.executeUpdate(query);
+               System.out.println("Longitude successfully updated!");
+               break;
+            }
+         }
+         catch(Exception e) {
+			   System.err.println(e.getMessage());
+		   }
+      }
    }
 }//end Retail
 
