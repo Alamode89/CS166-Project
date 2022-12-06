@@ -433,6 +433,66 @@ public class Retail {
 
 // Rest of the functions definition go in here
 
+   public static String getProduct() {
+      int product_num;
+      while(true) {
+         try {
+            System.out.println("\n\t1. 7up");
+            System.out.println("\t2. Brisk");
+            System.out.println("\t3. Donuts");
+            System.out.println("\t4. Egg");
+            System.out.println("\t5. Hot and Sour Soup");
+            System.out.println("\t6. Ice Cream");
+            System.out.println("\t7. Lemonade");
+            System.out.println("\t8. Orange Juice");
+            System.out.println("\t9. Pepsi");
+            System.out.println("\t10. Pudding");
+            System.out.print("Enter the number of the product: ");
+            product_num = Integer.parseInt(in.readLine());
+
+            if (product_num == 1) {
+               return "7up";
+            }
+            else if (product_num == 2) {
+               return "Brisk";
+            }
+            else if (product_num == 3) {
+               return "Donuts";
+            }
+            else if (product_num == 4) {
+               return "Egg";
+            }
+            else if (product_num == 5) {
+               return "Hot and Sour Soup";
+            }
+            else if (product_num == 6) {
+               return "Ice Cream";
+            }
+            else if (product_num == 7) {
+               return "Lemonade";
+            }
+            else if (product_num == 8) {
+               return "Orange Juice";
+            }
+            else if (product_num == 9) {
+               return "Pepsi";
+            }
+            else if (product_num == 10) {
+               return "Pudding";
+            }
+            else {
+               System.out.println("No such product.\n");
+               continue;
+            }
+         }
+      
+         catch(Exception e) {
+            System.out.println(e);
+            continue;
+         }
+      }
+   }
+
    public static void viewStores(Retail esql) {
       try {
          String Query = String.format("SELECT S.storeID as Store_ID, S.name as Store_Name FROM Store S, Users U WHERE U.userID = " + loggeduserID + " AND calculate_distance(U.latitude, u.longitude, s.latitude, s.longitude) < 30;");
@@ -491,9 +551,9 @@ public class Retail {
       }
       //get name of product
       while(true) {
-         System.out.print("Enter the name of the product: ");
          try {
-				productName = in.readLine();
+				productName = getProduct();
+            System.out.println(productName);
 				break;
 			}
 			catch(Exception e) {
@@ -507,9 +567,18 @@ public class Retail {
       while(true) {
          System.out.print("Enter the amount of product you wish to order: ");
          try {
-				numberOfUnits = Integer.parseInt(in.readLine());
-				break;
-			}
+            numberOfUnits = Integer.parseInt(in.readLine());
+            System.out.println("work?");
+            String query = String.format("SELECT P.numberOfUnits FROM Product P WHERE P.storeID = " + storeID + " AND P.productName = '" + productName + "';");
+            System.out.println(query);
+            List<List<String>> productAmntList = esql.executeQueryAndReturnResult(query);
+            int productAmnt = Integer.parseInt(productAmntList.get(0).get(0));
+            if(productAmnt - numberOfUnits < 0) {
+               System.out.println("The amount of product you wish to order exceeds the amount of product left, please re-enter the product amount. Amount of product left: " + productAmnt);
+               continue;
+            }
+            break;
+         }
 			catch(Exception e) {
 				System.out.println("Not a valid amount");
 				System.out.println(e);
@@ -529,10 +598,16 @@ public class Retail {
 
          query = String.format("UPDATE Product SET numberOfUnits = " + productAmnt + " WHERE storeID = " + storeID + " AND productName = '" + productName + "';");
          esql.executeUpdate(query);
+         //get managerID from the store
+         query = String.format("SELECT S.managerID FROM Store S WHERE S.storeID = " + storeID + ";");
+         List<List<String>> managerList = esql.executeQueryAndReturnResult(query);
+         int managerID = Integer.parseInt(managerList.get(0).get(0));
+         query = String.format("INSERT INTO ProductUpdates (managerID, storeID, productName, updatedOn) VALUES (%s, %s, '%s', DATE_TRUNC('second', CURRENT_TIMESTAMP::timestamp)", managerID, storeID, productName);
+         esql.executeUpdate(query);
          System.out.println ("Order successfully placed!");
       }
       catch(Exception e){
-         System.err.println (e.getMessage ());
+         System.err.println(e.getMessage ());
       }
    }
 
@@ -548,7 +623,6 @@ public class Retail {
 
    public static void updateProduct(Retail esql) {
       int storeID;
-      int product_num;
       String product_to_update = "";
       int updated_num_units;
       int updated_price_per_unit;
@@ -573,53 +647,7 @@ public class Retail {
             //}
 
             else /*if (esql == null)*/{
-               System.out.println("\n\t1. 7up");
-               System.out.println("\t2. Brisk");
-               System.out.println("\t3. Donuts");
-               System.out.println("\t4. Egg");
-               System.out.println("\t5. Hot and Sour Soup");
-               System.out.println("\t6. Ice Cream");
-               System.out.println("\t7. Lemonade");
-               System.out.println("\t8. Orange Juice");
-               System.out.println("\t9. Pepsi");
-               System.out.println("\t10. Pudding");
-               System.out.print("Enter the number of the product you want to update: ");
-               product_num = Integer.parseInt(in.readLine());
-
-               if (product_num == 1) {
-                  product_to_update = "7up";
-               }
-               else if (product_num == 2) {
-                  product_to_update = "Brisk";
-               }
-               else if (product_num == 3) {
-                  product_to_update = "Donuts";
-               }
-               else if (product_num == 4) {
-                  product_to_update = "Egg";
-               }
-               else if (product_num == 5) {
-                  product_to_update = "Hot and Sour Soup";
-               }
-               else if (product_num == 6) {
-                  product_to_update = "Ice Cream";
-               }
-               else if (product_num == 7) {
-                  product_to_update = "Lemonade";
-               }
-               else if (product_num == 8) {
-                  product_to_update = "Orange Juice";
-               }
-               else if (product_num == 9) {
-                  product_to_update = "Pepsi";
-               }
-               else if (product_num == 10) {
-                  product_to_update = "Pudding";
-               }
-               else if (product_num > 10 || product_num < 1){
-                  System.out.println("No such product.\n");
-                  return;
-               }
+               product_to_update = getProduct();
 
                System.out.printf("Update the number of units of %s: ", product_to_update);
                updated_num_units = Integer.parseInt(in.readLine());
@@ -779,7 +807,6 @@ public class Retail {
    }
    public static void placeProductSupplyRequests(Retail esql) {
       int storeID;
-      int product_num;
       String product_to_order = "";
       int num_units_needed;
       int warehouse_num;
@@ -799,58 +826,8 @@ public class Retail {
                System.out.println("Invalid Store ID.\n");
                return;
             }
-            else if (enteredstoreID.equals("")) {
-               System.out.println("You are not the manager of this store. \n");
-               return;
-            }
             else /*if (esql == null)*/{
-               System.out.println("\n\t1. 7up");
-               System.out.println("\t2. Brisk");
-               System.out.println("\t3. Donuts");
-               System.out.println("\t4. Egg");
-               System.out.println("\t5. Hot and Sour Soup");
-               System.out.println("\t6. Ice Cream");
-               System.out.println("\t7. Lemonade");
-               System.out.println("\t8. Orange Juice");
-               System.out.println("\t9. Pepsi");
-               System.out.println("\t10. Pudding");
-               System.out.print("Enter the number of the product you want to place an order for: ");
-               product_num = Integer.parseInt(in.readLine());
-
-               if (product_num == 1) {
-                  product_to_order = "7up";
-               }
-               else if (product_num == 2) {
-                  product_to_order = "Brisk";
-               }
-               else if (product_num == 3) {
-                  product_to_order = "Donuts";
-               }
-               else if (product_num == 4) {
-                  product_to_order = "Egg";
-               }
-               else if (product_num == 5) {
-                  product_to_order = "Hot and Sour Soup";
-               }
-               else if (product_num == 6) {
-                  product_to_order = "Ice Cream";
-               }
-               else if (product_num == 7) {
-                  product_to_order = "Lemonade";
-               }
-               else if (product_num == 8) {
-                  product_to_order = "Orange Juice";
-               }
-               else if (product_num == 9) {
-                  product_to_order = "Pepsi";
-               }
-               else if (product_num == 10) {
-                  product_to_order = "Pudding";
-               }
-               else if (product_num > 10 || product_num < 1){
-                  System.out.println("No such product.\n");
-                  return;
-               }
+               product_to_order = getProduct();
 
                System.out.printf("Number of units of %s needed: ", product_to_order);
                num_units_needed = Integer.parseInt(in.readLine());
