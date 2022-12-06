@@ -288,11 +288,11 @@ public class Retail {
                 System.out.println("1. View Stores within 30 miles");
                 System.out.println("2. View Product List");
                 System.out.println("3. Place a Order");
-                System.out.println("4. View 5 recent orders");
+                System.out.println("4. View 5 Recent Orders");
 
                 //the following functionalities basically used by managers
                 System.out.println("5. Update Product");
-                System.out.println("6. View 5 recent Product Updates Info");
+                System.out.println("6. View 5 Recent Product Updates Info");
                 System.out.println("7. View 5 Popular Items");
                 System.out.println("8. View 5 Popular Customers");
                 System.out.println("9. Place Product Supply Request to Warehouse");
@@ -373,23 +373,15 @@ public class Retail {
          System.out.print("\tEnter longitude: ");  //enter long value between [0.0, 100.0]
          String longitude = in.readLine();
          String type = "";
-         System.out.print("\tAre you a Manager or Admin? If yes, please enter the access password or press N if not: ");
+         System.out.print("\tAre you an Admin? If yes, please enter the access password or press enter if not: ");
          String accessCode = in.readLine();
 
-         if (accessCode.equals("manager")) {
-            type = "Manager";
-            System.out.println("Welcome Manager!");
-            /* must implement later
-            System.out.println("Please input the store ID you manage: ");
-            String storeID = in.readLine();
-            */
-         }
-         else if (accessCode.equals("admin")) {
-            type = "Admin";
+         if (accessCode.equals("admin")) {
+            type = "admin";
             System.out.println("Welcome Admin!");
          }
          else {
-            type = "Customer";
+            type = "customer";
          }
 
 			String query = String.format("INSERT INTO USERS (name, password, latitude, longitude, type) VALUES ('%s','%s', %s, %s,'%s')", name, password, latitude, longitude, type);
@@ -509,7 +501,7 @@ public class Retail {
       try {
          System.out.print("Enter Store ID: ");
          storeID = Integer.parseInt(in.readLine());
-         if(storeID > 20 || storeID == 0) {
+         if(storeID > 20 || storeID <= 0) {
             System.out.println("\nInvalid Store ID\n");
             return;
          }   
@@ -626,8 +618,8 @@ public class Retail {
          if (userType.equals("manager")) {
             System.out.print("Enter Store ID: ");
             storeID = Integer.parseInt(in.readLine());
-            if(storeID > 20 || storeID == 0) {
-               System.out.println("\n Store ID.\n");
+            if(storeID > 20 || storeID <= 0) {
+               System.out.println("\n Invalid Store ID.\n");
                return;
             }
 
@@ -652,10 +644,33 @@ public class Retail {
             esql.executeUpdate(query);   
             System.out.println("\nSuccessfully updated productUpdates table\n");
          }        
+
+         else if (userType.equals("admin")) {
+            System.out.print("Enter Store ID: ");
+            storeID = Integer.parseInt(in.readLine());
+            if(storeID > 20 || storeID <= 0) {
+               System.out.println("\n Invalid Store ID.\n");
+               return;
+            }
+
+            product_to_update = getProduct();
+            System.out.printf("Update the number of units of %s at Store %d: ", product_to_update, storeID);
+            updated_num_units = Integer.parseInt(in.readLine());
+            System.out.print("Update the price of " + product_to_update + ": ");
+            updated_price_per_unit = Integer.parseInt(in.readLine()); 
+
+            query = String.format("UPDATE product P SET numberofUnits = " + updated_num_units + ", pricePerUnit = " + updated_price_per_unit + " WHERE P.storeID = " + storeID + "  AND P.productName = \'" + product_to_update + "\';");
+            esql.executeUpdate(query);
+            System.out.printf("\nSuccessfully updated %s at Store %d", product_to_update, storeID);
+            query = String.format("INSERT INTO productupdates (managerID, storeID, productName, updatedOn) VALUES (%s, %s,'%s', CURRENT_TIMESTAMP(0))",  loggeduserID, storeID, product_to_update);
+            esql.executeUpdate(query);   
+            System.out.println("\nSuccessfully updated productUpdates table\n");
+         }      
+
          else {
             System.out.println("You do not have access to this.\n");
             return;            
-         }
+         }  
       }
 		catch(Exception e) {
 			System.err.println(e.getMessage());
@@ -672,7 +687,7 @@ public class Retail {
             int storeID;
             System.out.print("Enter Store ID: ");
             storeID = Integer.parseInt(in.readLine());
-            if(storeID > 20 || storeID == 0) {
+            if(storeID > 20 || storeID <= 0) {
                System.out.println("\nInvalid Store ID.\n");
                return;
             }
@@ -693,12 +708,12 @@ public class Retail {
             int storeID;
             System.out.print("Enter Store ID: ");
             storeID = Integer.parseInt(in.readLine());
-            if(storeID > 20 || storeID == 0) {
+            if(storeID > 20 || storeID <= 0) {
                System.out.println("\nInvalid Store ID.\n");
                return;
             }            
             System.out.println("The most recent updates to the products of Store " + storeID + " are: ");
-            query = String.format("SELECT P.updatenumber, P.managerId, P.storeID, P.productName, P.updatedOn FROM productUpdates P WHERE P.managerID = " + loggeduserID + " AND P.storeID = " + storeID  + " ORDER BY P.updateNumber DESC LIMIT 5;");
+            query = String.format("SELECT P.updatenumber, P.managerId, P.storeID, P.productName, P.updatedOn FROM productUpdates P WHERE P.storeID = " + storeID  + " ORDER BY P.updateNumber DESC LIMIT 5;");
             esql.executeQueryAndPrintResult(query);            
          }
          else {
@@ -720,7 +735,7 @@ public class Retail {
          if (userType.equals("manager")) {
             System.out.print("Enter Store ID: ");
             storeID = Integer.parseInt(in.readLine());
-            if(storeID > 20 || storeID == 0) {
+            if(storeID > 20 || storeID <= 0) {
                System.out.println("\n Store ID.\n");
                return;
             }
@@ -733,15 +748,29 @@ public class Retail {
             }
             else {
                System.out.println("\nTop 5 products from Store " + storeID + ": ");
-               query = String.format("SELECT P.productname, COUNT(O.unitsOrdered) AS Number_of_Times_Ordered FROM product P, users U, store S, orders O WHERE U.userID = " + loggeduserID + " AND U.userID = S.managerID  AND S.storeID = " + storeID + " AND S.storeID = P.storeID AND O.storeID = P.storeID AND P.productName = O.productname GROUP BY P.productname ORDER BY Number_of_Times_Ordered DESC LIMIT 5;");
+               query = String.format("SELECT P.productname, COUNT(O.unitsOrdered) AS Number_of_Times_Ordered FROM product P, users U, store S, orders O WHERE U.userID = " + loggeduserID + " AND U.userID = S.managerID AND S.storeID = " + storeID + " AND S.storeID = P.storeID AND O.storeID = P.storeID AND P.productName = O.productname GROUP BY P.productname ORDER BY Number_of_Times_Ordered DESC LIMIT 5;");
                esql.executeQueryAndPrintResult(query);
                System.out.println("\n"); 
             }
          }
+
+         else if (userType.equals("admin")) {
+            System.out.print("Enter Store ID: ");
+            storeID = Integer.parseInt(in.readLine());
+            if(storeID > 20 || storeID <= 0) {
+               System.out.println("\n Store ID.\n");
+               return;
+            }
+            System.out.println("\nTop 5 products from Store " + storeID + ": ");
+            query = String.format("SELECT O.productname, COUNT(O.unitsOrdered) AS Number_of_Times_Ordered FROM orders O WHERE O.storeID = " + storeID + " GROUP BY O.productname ORDER BY Number_of_Times_Ordered DESC LIMIT 5;");
+            esql.executeQueryAndPrintResult(query);
+            System.out.println("\n"); 
+            }
          else {
             System.out.println("You do not have access to this.\n");
             return;            
          }
+
       }
 		catch(Exception e) {
 			System.err.println(e.getMessage());
@@ -758,7 +787,7 @@ public class Retail {
          if (userType.equals("manager")) {
             System.out.print("Enter Store ID: ");
             storeID = Integer.parseInt(in.readLine());
-            if(storeID > 20 || storeID == 0) {
+            if(storeID > 20 || storeID <= 0) {
                System.out.println("\nInvalid Store ID.\n");
                return;
             }
@@ -771,6 +800,20 @@ public class Retail {
             }
             System.out.println("\nYour top 5 customers from Store " + storeID + ": ");
             query = String.format("SELECT * FROM users U INNER JOIN (SELECT O.customerID, COUNT(O.customerID) as Number_of_Orders_Placed FROM orders O, users U, store S WHERE  U.userID = " + loggeduserID +" AND U.userID = S.managerID AND S.storeID = " + storeID + " AND S.storeID = O.storeID GROUP BY O.customerID ORDER BY Number_of_Orders_Placed DESC) AS x ON U.userID = x.CustomerID ORDER BY Number_of_Orders_Placed DESC LIMIT 5;");
+            esql.executeQueryAndPrintResult(query);
+            System.out.println("\n");
+         }
+
+         else if (userType.equals("admin")) {
+            System.out.print("Enter Store ID: ");
+            storeID = Integer.parseInt(in.readLine());
+            if(storeID > 20 || storeID <= 0) {
+               System.out.println("\nInvalid Store ID.\n");
+               return;
+            }
+            
+            System.out.println("\nYour top 5 customers from Store " + storeID + ": ");
+            query = String.format("SELECT * FROM users U INNER JOIN (SELECT O.customerID, COUNT(O.customerID) as Number_of_Orders_Placed FROM orders O WHERE O.storeID = " + storeID + " GROUP BY O.customerID ORDER BY Number_of_Orders_Placed DESC) AS x ON U.userID = x.CustomerID ORDER BY Number_of_Orders_Placed DESC LIMIT 5;");
             esql.executeQueryAndPrintResult(query);
             System.out.println("\n");
          }
@@ -797,7 +840,7 @@ public class Retail {
          if (userType.equals("manager")) {
             System.out.print("Enter Store ID: ");
             storeID = Integer.parseInt(in.readLine());
-            if(storeID > 20 || storeID == 0) {
+            if(storeID > 20 || storeID <= 0) {
                System.out.println("\nInvalid Store ID.\n");
                return;
             }
@@ -845,9 +888,15 @@ public class Retail {
 
    public static void updateUser(Retail esql) {
       int userID;
+      int updateNumber;
+      String name;
+      String password;
+      String latitude;
+      String longitude;
+      String query;
       //check if user is an Admin
       try {
-         String query = String.format("SELECT type FROM Users WHERE userID = " + loggeduserID + ";");
+         query = String.format("SELECT type FROM Users WHERE userID = " + loggeduserID + ";");
          List<List<String>> userTypeList = esql.executeQueryAndReturnResult(query);
          String userType = userTypeList.get(0).get(0).replaceAll("\\s+", "");
          if(!userType.equals("admin")) {
@@ -863,9 +912,9 @@ public class Retail {
       while(true) {
          //check if valid userID
          try {
-            System.out.println("Enter userID that you would like to update: ");
+            System.out.println("\nEnter userID that you would like to update: ");
             userID = Integer.parseInt(in.readLine());
-            String query = String.format("SELECT name FROM Users WHERE userID = " + userID + ";");
+            query = String.format("SELECT name FROM Users WHERE userID = " + userID + ";");
             List<List<String>> userExistsList = esql.executeQueryAndReturnResult(query);
             if(userExistsList.size() <= 0) {
                System.out.println("This user does not exist, please enter a valid userID");
@@ -878,8 +927,51 @@ public class Retail {
          }
       }
 
-      System.out.println("hello!");
+      while(true) {
+         try {
+            System.out.println("1. Name");
+            System.out.println("2. Password");
+            System.out.println("3. Latitude");
+            System.out.println("4. Longitude");
+            System.out.println("\nWhat would you like to update: ");
+            updateNumber = Integer.parseInt(in.readLine());
+            if(updateNumber == 1) {
+               System.out.println("\nEnter the new name: ");
+               name = in.readLine();
+               query = String.format("UPDATE Users U SET name = '" + name + "' WHERE userID = " + userID + ";");
+               esql.executeUpdate(query);
+               System.out.println("Name successfully updated!");
+               break;
+            }
+            else if(updateNumber == 2) {
+               System.out.println("\nEnter the new password: ");
+               password = in.readLine();
+               query = String.format("UPDATE Users U SET password = '" + password + "' WHERE userID = " + userID + ";");
+               esql.executeUpdate(query);
+               System.out.println("Password successfully updated!");
+               break;
+            }
+            else if(updateNumber == 3) {
+               System.out.println("\nEnter the new latitude: ");
+               latitude = in.readLine();
+               query = String.format("UPDATE Users U SET latitude = " + latitude + " WHERE userID = " + userID + ";");
+               esql.executeUpdate(query);
+               System.out.println("Latitude successfully updated!");
+               break;
+            }
+            else if(updateNumber == 4) {
+               System.out.println("\nEnter the new latitude: ");
+               longitude = in.readLine();
+               query = String.format("UPDATE Users U SET latitude = " + longitude + " WHERE userID = " + userID + ";");
+               esql.executeUpdate(query);
+               System.out.println("Longitude successfully updated!");
+               break;
+            }
+         }
+         catch(Exception e) {
+			   System.err.println(e.getMessage());
+		   }
+      }
    }
-
 }//end Retail
 
