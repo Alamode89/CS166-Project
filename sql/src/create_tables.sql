@@ -77,6 +77,7 @@ CREATE TABLE ProductUpdates (
                         	FOREIGN KEY(storeID, productName) REFERENCES Product(storeID, productName)
 );
 
+--calculate distance function so it can be in one query/simpler syntax
 CREATE OR REPLACE FUNCTION calculate_distance(lat1 decimal, long1 decimal, lat2 decimal, long2 decimal)
 RETURNS decimal AS $dist$
 BEGIN RETURN sqrt((lat1 - lat2) * (lat1 - lat2) + (long1 - long2) * (long1 - long2));
