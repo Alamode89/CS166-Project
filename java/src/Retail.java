@@ -893,6 +893,5 @@ public class Retail {
 			System.err.println(e.getMessage());
 		}
    }
-
 }//end Retail
 
