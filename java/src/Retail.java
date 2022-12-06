@@ -567,11 +567,9 @@ public class Retail {
       while(true) {
          System.out.print("Enter the amount of product you wish to order: ");
          try {
-            numberOfUnits = Integer.parseInt(in.readLine());
-            System.out.println("work?");
-            String query = String.format("SELECT P.numberOfUnits FROM Product P WHERE P.storeID = " + storeID + " AND P.productName = '" + productName + "';");
-            System.out.println(query);
+            String query = String.format("SELECT P.numberOfUnits FROM Product P, Store S WHERE S.storeID = " + storeID + " AND P.storeID = " + storeID + " AND P.productName = '" + productName + "';");
             List<List<String>> productAmntList = esql.executeQueryAndReturnResult(query);
+            numberOfUnits = Integer.parseInt(in.readLine());
             int productAmnt = Integer.parseInt(productAmntList.get(0).get(0));
             if(productAmnt - numberOfUnits < 0) {
                System.out.println("The amount of product you wish to order exceeds the amount of product left, please re-enter the product amount. Amount of product left: " + productAmnt);
@@ -602,7 +600,7 @@ public class Retail {
          query = String.format("SELECT S.managerID FROM Store S WHERE S.storeID = " + storeID + ";");
          List<List<String>> managerList = esql.executeQueryAndReturnResult(query);
          int managerID = Integer.parseInt(managerList.get(0).get(0));
-         query = String.format("INSERT INTO ProductUpdates (managerID, storeID, productName, updatedOn) VALUES (%s, %s, '%s', DATE_TRUNC('second', CURRENT_TIMESTAMP::timestamp)", managerID, storeID, productName);
+         query = String.format("INSERT INTO ProductUpdates (managerID, storeID, productName, updatedOn) VALUES (%s, %s, '%s', DATE_TRUNC('second', CURRENT_TIMESTAMP::timestamp))", managerID, storeID, productName);
          esql.executeUpdate(query);
          System.out.println ("Order successfully placed!");
       }
