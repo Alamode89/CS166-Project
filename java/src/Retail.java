@@ -296,7 +296,7 @@ public class Retail {
                 System.out.println("7. View 5 Popular Items");
                 System.out.println("8. View 5 Popular Customers");
                 System.out.println("9. Place Product Supply Request to Warehouse");
-
+                System.out.println("10. Administrator User Update");
                 System.out.println(".........................");
                 System.out.println("20. Log out");
                 switch (readChoice()){
@@ -309,7 +309,7 @@ public class Retail {
                    case 7: viewPopularProducts(esql); break;
                    case 8: viewPopularCustomers(esql); break;
                    case 9: placeProductSupplyRequests(esql); break;
-
+                   case 10: updateUser(esql); break;
                    case 20: usermenu = false; break;
                    default : System.out.println("Unrecognized choice!"); break;
                 }
@@ -841,6 +841,44 @@ public class Retail {
       catch(Exception e) {
 			System.err.println(e.getMessage());
 		}
+   }
+
+   public static void updateUser(Retail esql) {
+      int userID;
+      //check if user is an Admin
+      try {
+         String query = String.format("SELECT type FROM Users WHERE userID = " + loggeduserID + ";");
+         List<List<String>> userTypeList = esql.executeQueryAndReturnResult(query);
+         String userType = userTypeList.get(0).get(0).replaceAll("\\s+", "");
+         if(!userType.equals("admin")) {
+            System.out.println("You are not an administrator.");
+            return;
+         }
+      }
+      catch(Exception e) {
+         System.err.println(e.getMessage());
+      }
+
+      //Ask admin what user they want to update
+      while(true) {
+         //check if valid userID
+         try {
+            System.out.println("Enter userID that you would like to update: ");
+            userID = Integer.parseInt(in.readLine());
+            String query = String.format("SELECT name FROM Users WHERE userID = " + userID + ";");
+            List<List<String>> userExistsList = esql.executeQueryAndReturnResult(query);
+            if(userExistsList.size() <= 0) {
+               System.out.println("This user does not exist, please enter a valid userID");
+               continue;
+            }
+            break;
+         }
+         catch(Exception e) {
+            System.err.println(e.getMessage());
+         }
+      }
+
+      System.out.println("hello!");
    }
 
 }//end Retail
