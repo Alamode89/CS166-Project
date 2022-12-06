@@ -596,12 +596,6 @@ public class Retail {
 
          query = String.format("UPDATE Product SET numberOfUnits = " + productAmnt + " WHERE storeID = " + storeID + " AND productName = '" + productName + "';");
          esql.executeUpdate(query);
-         //get managerID from the store
-         query = String.format("SELECT S.managerID FROM Store S WHERE S.storeID = " + storeID + ";");
-         List<List<String>> managerList = esql.executeQueryAndReturnResult(query);
-         int managerID = Integer.parseInt(managerList.get(0).get(0));
-         query = String.format("INSERT INTO ProductUpdates (managerID, storeID, productName, updatedOn) VALUES (%s, %s, '%s', DATE_TRUNC('second', CURRENT_TIMESTAMP::timestamp))", managerID, storeID, productName);
-         esql.executeUpdate(query);
          System.out.println ("Order successfully placed!");
       }
       catch(Exception e){
